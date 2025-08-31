@@ -5,7 +5,9 @@ import {
   getUserApi,
   loginUserApi,
   logoutApi,
-  updateUserApi
+  updateUserApi,
+  TLoginData,
+  TRegisterData
 } from '@api';
 import { setCookie, deleteCookie } from '../../utils/cookie';
 
@@ -25,11 +27,43 @@ const initialState: IUserState = {
 
 export const fetchRegisterUser = createAsyncThunk(
   'user/registerUser',
-  registerUserApi
-);
-export const fetchLoginUser = createAsyncThunk('user/LoginUser', loginUserApi);
+  async (data: TRegisterData, { dispatch }) => {
+    const response = await registerUserApi(data);
+    const { refreshToken, accessToken, user, success } = response;
 
-export const fetchLogoutUser = createAsyncThunk('user/LogoutUser', logoutApi);
+    if (success) {
+      dispatch(setTokens({ refreshToken, accessToken }));
+    }
+
+    return user;
+  }
+);
+export const fetchLoginUser = createAsyncThunk(
+  'user/LoginUser',
+  async (credentials: TLoginData, { dispatch }) => {
+    const response = await loginUserApi(credentials);
+    const { refreshToken, accessToken, user, success } = response;
+
+    if (success) {
+      dispatch(setTokens({ refreshToken, accessToken }));
+    }
+
+    return user;
+  }
+);
+
+export const fetchLogoutUser = createAsyncThunk(
+  'user/LogoutUser',
+  async (_, { dispatch }) => {
+    const response = await logoutApi();
+
+    if (response.success) {
+      dispatch(clearTokens());
+    }
+
+    return response;
+  }
+);
 
 export const fetchUptatedUser = createAsyncThunk(
   'user/updateUserApi',
@@ -44,6 +78,18 @@ const userSlice = createSlice({
   reducers: {
     init(state) {
       state.isInit = true;
+    },
+    setTokens(_, action) {
+      const { refreshToken, accessToken } = action.payload;
+      localStorage.setItem('refreshToken', refreshToken);
+      setCookie('accessToken', accessToken);
+    },
+    clearTokens() {
+      localStorage.removeItem('refreshToken');
+      deleteCookie('accessToken');
+    },
+    setUser(state, action) {
+      state.user = action.payload;
     }
   },
   extraReducers: (builder) => {
@@ -55,10 +101,7 @@ const userSlice = createSlice({
       .addCase(fetchRegisterUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.error = null;
-        const { refreshToken, accessToken, user } = action.payload;
-        localStorage.setItem('refreshToken', refreshToken);
-        setCookie('accessToken', accessToken);
-        state.user = user;
+        state.user = action.payload;
       })
       .addCase(fetchRegisterUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -69,11 +112,10 @@ const userSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(fetchUser.fulfilled, (state, action) => {
-        const { user } = action.payload;
         state.isInit = true;
         state.isLoading = false;
         state.error = null;
-        state.user = user;
+        state.user = action.payload.user;
       })
       .addCase(fetchUser.rejected, (state, action) => {
         state.isInit = true;
@@ -87,10 +129,7 @@ const userSlice = createSlice({
       .addCase(fetchLoginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.error = null;
-        const { refreshToken, accessToken, user } = action.payload;
-        localStorage.setItem('refreshToken', refreshToken);
-        setCookie('accessToken', accessToken);
-        state.user = user;
+        state.user = action.payload;
       })
       .addCase(fetchLoginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -102,8 +141,6 @@ const userSlice = createSlice({
       })
       .addCase(fetchLogoutUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        localStorage.removeItem('refreshToken');
-        deleteCookie('accessToken');
         state.error = null;
         state.user = null;
       })
@@ -127,6 +164,6 @@ const userSlice = createSlice({
   }
 });
 
-export const { init } = userSlice.actions;
+export const { init, setTokens, setUser, clearTokens } = userSlice.actions;
 
 export default userSlice.reducer;

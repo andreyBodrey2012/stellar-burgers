@@ -35,8 +35,8 @@ const feedSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchFeed.fulfilled, (state, action) => {
-        state.isLoading = false;
         const { orders, total, totalToday } = action.payload;
+        state.isLoading = false;
         state.items = orders;
         state.total = total;
         state.totalToday = totalToday;

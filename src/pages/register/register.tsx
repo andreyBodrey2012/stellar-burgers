@@ -1,6 +1,6 @@
 import { FC, SyntheticEvent, useState, useCallback } from 'react';
 import { RegisterUI } from '@ui-pages';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from '../../services/store';
 import { fetchRegisterUser } from '../../services/slices/userSlice';
 
@@ -10,6 +10,7 @@ export const Register: FC = () => {
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const nav = useNavigate();
+  const loc = useLocation();
 
   const handleSubmit = useCallback(
     (e: SyntheticEvent) => {
@@ -18,7 +19,7 @@ export const Register: FC = () => {
         dispatch(fetchRegisterUser({ name: userName, email, password }))
           .unwrap()
           .then((data) => {
-            if (data.success) nav('/');
+            if (data) nav(loc?.state?.from?.pathname || '/', { replace: true });
           })
           .catch((error: Error) => {
             console.error('Who use this email or userName.', error);

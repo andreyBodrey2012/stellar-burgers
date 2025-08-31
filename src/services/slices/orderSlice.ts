@@ -1,7 +1,11 @@
 import { orderBurgerApi } from '@api';
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { TConstructorIngredient, TIngredient, TOrder } from '@utils-types';
-import { v4 as uuid } from 'uuid';
+import {
+  createAsyncThunk,
+  createSlice,
+  PayloadAction,
+  nanoid
+} from '@reduxjs/toolkit';
+import { TConstructorIngredient, TOrder, TIngredient } from '@utils-types';
 
 type TConstructorItems = {
   bun: TConstructorIngredient | undefined | null;
@@ -36,15 +40,19 @@ const orderSlice = createSlice({
   name: 'order',
   initialState,
   reducers: {
-    addItem(state, action: PayloadAction<TIngredient>) {
-      if (action.payload.type === 'bun') {
-        state.items.bun = { id: action.payload._id, ...action.payload };
-        return;
+    addItem: {
+      reducer(state, action: PayloadAction<TConstructorIngredient>) {
+        if (action.payload.type === 'bun') {
+          state.items.bun = action.payload;
+        } else {
+          state.items.ingredients.push(action.payload);
+        }
+      },
+      prepare(ingredient: TIngredient): { payload: TConstructorIngredient } {
+        if (ingredient.type === 'bun')
+          return { payload: { id: ingredient._id, ...ingredient } };
+        return { payload: { ...ingredient, id: nanoid() } };
       }
-      state.items.ingredients = [
-        ...state.items.ingredients,
-        { ...action.payload, id: uuid() }
-      ];
     },
     removeItem(state, action: PayloadAction<Number>) {
       state.items.ingredients = state.items.ingredients.filter(
