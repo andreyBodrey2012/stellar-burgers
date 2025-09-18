@@ -11,7 +11,7 @@ import {
 } from '@api';
 import { setCookie, deleteCookie } from '../../utils/cookie';
 
-interface IUserState {
+export interface IUserState {
   user: TUser | null;
   isLoading: boolean;
   isInit: boolean;

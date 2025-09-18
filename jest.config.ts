@@ -3,8 +3,9 @@
  * https://jestjs.io/docs/configuration
  */
 
-/** @type {import('jest').Config} */
-const config = {
+import type {Config} from 'jest';
+
+const config: Config = {
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
@@ -18,13 +19,13 @@ const config = {
   // clearMocks: false,
 
   // Indicates whether the coverage information should be collected while executing the test
-  // collectCoverage: false,
+  collectCoverage: true,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
   // collectCoverageFrom: undefined,
 
   // The directory where Jest should output its coverage files
-  // coverageDirectory: undefined,
+  coverageDirectory: "coverage",
 
   // An array of regexp pattern strings used to skip coverage collection
   // coveragePathIgnorePatterns: [
@@ -33,6 +34,23 @@ const config = {
 
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: "v8",
+
+  preset: "ts-jest",
+  testEnvironment: "node",
+
+  transform: {
+    // '^.+\\.[tj]sx?$' для обработки файлов js/ts с помощью `ts-jest`
+    // '^.+\\.m?[tj]sx?$' для обработки файлов js/ts/mjs/mts с помощью `ts-jest`
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        // настройки для ts-jest
+      },
+    ],
+  },
+  moduleNameMapper: {
+    '^@api$': '<rootDir>/src/utils/burger-api.ts',
+  }, 
 
   // A list of reporter names that Jest uses when writing coverage reports
   // coverageReporters: [
@@ -197,4 +215,4 @@ const config = {
   // watchman: true,
 };
 
-module.exports = config;
+export default config;

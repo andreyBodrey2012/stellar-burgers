@@ -10,17 +10,6 @@ describe('проверяем страницу конструктора бург�
     cy.visit('http://localhost:4000');
   });
 
-  //   it('проверка создания заказа', () => {
-  //     cy.intercept('GET', 'api/auth/user', { fixture: 'user.json' }).as(
-  //       'getUser'
-  //     );
-
-  //     cy.wait('@getUser').then((interception) => {
-  //       expect(interception.response.statusCode).to.eq(200);
-  //       // expect(interception.response.body.data).to.have.length(15);
-  //     });
-  //   });
-
   it('проверяем добавление ингредиента из списка в конструктор', () => {
     cy.wait('@getIngredients').then((interception) => {
       expect(interception.response.statusCode).to.eq(200);
@@ -96,6 +85,10 @@ describe('проверяем создание заказа бургера', () =
     );
     cy.visit('http://localhost:4000');
   });
+  afterEach(() => {
+    cy.clearCookie('accessToken');
+    cy.clearAllLocalStorage();
+  })
 
   it('проверка создания заказа', () => {
     cy.setCookie('accessToken', 'accessToken');
@@ -107,7 +100,6 @@ describe('проверяем создание заказа бургера', () =
 
     cy.wait('@getUser').then((interception) => {
       expect(interception.response.statusCode).to.eq(200);
-      // expect(interception.response.body.data).to.have.length(15);
     });
 
     fixtureOrderRequst.ingredients.forEach((id) => {

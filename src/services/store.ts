@@ -13,7 +13,7 @@ import userReducer from './slices/userSlice';
 import feedReducers from './slices/feedSlice';
 import userOrdersReducers from './slices/userOrdersSlice';
 
-const rootReducer = {
+export const rootReducer = {
   app: appReducer,
   ingredients: ingredientReducer,
   order: orderReducer,

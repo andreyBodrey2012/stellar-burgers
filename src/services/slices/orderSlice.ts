@@ -17,7 +17,7 @@ export enum EMoveDirection {
   Down = 1
 }
 
-interface OrderState {
+export interface OrderState {
   items: TConstructorItems;
   error: null | string;
   orderRequest: boolean;

@@ -2,7 +2,7 @@ import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { TOrder } from '@utils-types';
 import { getFeedsApi, getOrderByNumberApi } from '@api';
 
-interface FeedState {
+export interface FeedState {
   isLoading: boolean;
   items: TOrder[];
   total: number;

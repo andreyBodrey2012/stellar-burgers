@@ -2,7 +2,7 @@ import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { TIngredient } from '@utils-types';
 import { getIngredientsApi } from '@api';
 
-interface IngredientState {
+export interface IngredientState {
   isLoading: boolean;
   items: TIngredient[];
   error: string | null;
@@ -49,5 +49,7 @@ const ingredientSlice = createSlice({
 });
 
 export const { selectItems, selectIsLoading } = ingredientSlice.selectors;
+
+export const { setLoading } = ingredientSlice.actions;
 
 export default ingredientSlice.reducer;
