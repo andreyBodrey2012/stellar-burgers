@@ -2,7 +2,7 @@ import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { TOrder } from '@utils-types';
 import { getOrderByNumberApi } from '@api';
 
-interface AppState {
+export interface AppState {
   ready: boolean;
   selectedIngredient: string | null;
   selectedFeedOrder: string | null;

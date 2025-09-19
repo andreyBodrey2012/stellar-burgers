@@ -2,7 +2,7 @@ import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { TOrder } from '@utils-types';
 import { getOrdersApi } from '@api';
 
-interface UserOrdersState {
+export interface UserOrdersState {
   isLoading: boolean;
   items: TOrder[];
   error: string | null;
