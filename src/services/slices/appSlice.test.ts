@@ -4,7 +4,6 @@ import appSliceReducer, {
   setFeedOrder,
   setIngredient
 } from './appSlice';
-import { configureStore } from '@reduxjs/toolkit';
 
 describe('проверка app стора', () => {
   const initialState: AppState = {

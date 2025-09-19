@@ -23,8 +23,8 @@ describe('проверяем страницу конструктора бург�
     button.contains('Добавить');
     button.click();
 
-    cy.get('[data-cy=order-price]').contains(
-      `${fixtureIngredients.data[0].price * 2}`
+    cy.get('[data-cy=orders_all-ingrediens]').contains(
+      fixtureIngredients.data[0].name
     );
   });
 
@@ -34,7 +34,6 @@ describe('проверяем страницу конструктора бург�
       expect(interception.response.body.data).to.have.length(15);
     });
 
-    let orderSum = 0;
     [
       fixtureIngredients.data.filter(({ type }) => type === 'bun')[1],
       fixtureIngredients.data[5],
@@ -46,8 +45,7 @@ describe('проверяем страницу конструктора бург�
       button.contains('Добавить');
       button.click();
 
-      orderSum += item.type === 'bun' ? item.price * 2 : item.price;
-      cy.get('[data-cy=order-price]').contains(`${orderSum}`);
+      cy.get('[data-cy=orders_all-ingrediens]').contains(item.name);
     });
   });
 
@@ -88,11 +86,16 @@ describe('проверяем создание заказа бургера', () =
   afterEach(() => {
     cy.clearCookie('accessToken');
     cy.clearAllLocalStorage();
-  })
+  });
 
   it('проверка создания заказа', () => {
     cy.setCookie('accessToken', 'accessToken');
     cy.setLocalStorage('refreshToken', 'refreshToken');
+
+    cy.wait('@getIngredients').then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+      expect(interception.response.body.data).to.have.length(15);
+    });
 
     cy.intercept('GET', 'api/auth/user', { fixture: 'user.json' }).as(
       'getUser'
@@ -129,6 +132,7 @@ describe('проверяем создание заказа бургера', () =
     cy.get('[data-cy=modal] button').click();
     cy.get('[data-cy=modal]').should('not.exist');
 
-    cy.get('[data-cy=order-price]').contains(0);
+    cy.get('[data-cy=orders_all-ingrediens]').contains('Выберите булки');
+    cy.get('[data-cy=orders_all-ingrediens]').contains('Выберите начинку');
   });
 });

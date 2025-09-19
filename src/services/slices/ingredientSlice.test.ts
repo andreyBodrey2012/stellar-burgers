@@ -20,7 +20,48 @@ describe('тест ингредиентов', () => {
     expect(isLoading).toBeTruthy();
   });
 
-  it('тест загрузки ингридиентов', async () => {
+  it('тест загрузки ингридиентов с ошибкой', async () => {
+    const expectResult = {
+      message: 'not found'
+    };
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          new Promise((resolve) => setTimeout(() => resolve(expectResult), 0))
+      })
+    ) as jest.Mock;
+
+    const store = configureStore({
+      reducer: { ingredients: ingredientsReducer }
+    });
+
+    const dispatchPromise = store.dispatch(fetchIngredients());
+
+    const stateDuringLoading = store.getState().ingredients;
+    expect(stateDuringLoading.isLoading).toBeTruthy();
+
+    await dispatchPromise;
+
+    const { items, error, isLoading } = store.getState().ingredients;
+    expect(error).toEqual('not found');
+    expect(isLoading).toBeFalsy();
+    expect(items).toEqual([]);
+  });
+
+  it('проверка pending', () => {
+    const newState = ingredientsReducer(
+      initialState,
+      fetchIngredients.pending('')
+    );
+
+    expect(newState).toEqual({
+      ...initialState,
+      isLoading: true
+    });
+  });
+
+  it('проверка fulfilled', () => {
     const expectResult = {
       success: true,
       data: [
@@ -73,57 +114,28 @@ describe('тест ингредиентов', () => {
         }
       ]
     };
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          new Promise((resolve) => setTimeout(() => resolve(expectResult), 0))
-      })
-    ) as jest.Mock;
 
-    const store = configureStore({
-      reducer: { ingredients: ingredientsReducer }
+    const newState = ingredientsReducer(
+      initialState,
+      fetchIngredients.fulfilled(expectResult.data, '')
+    );
+
+    expect(newState).toEqual({
+      ...initialState,
+      isLoading: false,
+      items: expectResult.data
     });
-
-    const dispatchPromise = store.dispatch(fetchIngredients());
-
-    const stateDuringLoading = store.getState().ingredients;
-    expect(stateDuringLoading.isLoading).toBeTruthy();
-
-    await dispatchPromise;
-
-    const { items, error, isLoading } = store.getState().ingredients;
-    expect(error).toBeNull();
-    expect(isLoading).toBeFalsy();
-    expect(items).toEqual(expectResult.data);
   });
 
-  it('тест загрузки ингридиентов с ошибкой', async () => {
-    const expectResult = {
-      message: 'not found'
-    };
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          new Promise((resolve) => setTimeout(() => resolve(expectResult), 0))
-      })
-    ) as jest.Mock;
+  it('проверка rejected', () => {
+    const newState = ingredientsReducer(
+      initialState,
+      fetchIngredients.rejected(new Error('Error rejected'), '')
+    );
 
-    const store = configureStore({
-      reducer: { ingredients: ingredientsReducer }
+    expect(newState).toEqual({
+      ...initialState,
+      error: 'Error rejected'
     });
-
-    const dispatchPromise = store.dispatch(fetchIngredients());
-
-    const stateDuringLoading = store.getState().ingredients;
-    expect(stateDuringLoading.isLoading).toBeTruthy();
-
-    await dispatchPromise;
-
-    const { items, error, isLoading } = store.getState().ingredients;
-    expect(error).toEqual('not found');
-    expect(isLoading).toBeFalsy();
-    expect(items).toEqual([]);
   });
 });

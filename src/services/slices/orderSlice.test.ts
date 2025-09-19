@@ -2,6 +2,7 @@ import { expect, describe, it } from '@jest/globals';
 import orderReducer, {
   addItem,
   EMoveDirection,
+  fetchOrders,
   moveItem,
   OrderState,
   removeItem
@@ -107,5 +108,94 @@ describe('проверка конструктора', () => {
     expect(
       newState.items.ingredients.findIndex((item) => item._id === items[2]._id)
     ).toEqual(1);
+  });
+
+  it('проверка pending', () => {
+    const newState = orderReducer(initialState, fetchOrders.pending('', []));
+
+    expect(newState).toEqual({
+      ...initialState,
+      orderRequest: true
+    });
+  });
+
+  it('проверка fulfilled', () => {
+    const initialState1 = {
+      ...initialState,
+      items: {
+        bun: {
+          _id: '643d69a5c3f7b9001cfa093c',
+          id: '643d69a5c3f7b9001cfa093c',
+          name: 'Краторная булка N-200i',
+          type: 'bun',
+          proteins: 80,
+          fat: 24,
+          carbohydrates: 53,
+          calories: 420,
+          price: 1255,
+          image: 'https://code.s3.yandex.net/react/code/bun-02.png',
+          image_mobile:
+            'https://code.s3.yandex.net/react/code/bun-02-mobile.png',
+          image_large: 'https://code.s3.yandex.net/react/code/bun-02-large.png',
+          __v: 0
+        },
+        ingredients: [
+          {
+            _id: '643d69a5c3f7b9001cfa0941',
+            id: '643d69a5c3f7b9001cfa0941',
+            name: 'Биокотлета из марсианской Магнолии',
+            type: 'main',
+            proteins: 420,
+            fat: 142,
+            carbohydrates: 242,
+            calories: 4242,
+            price: 424,
+            image: 'https://code.s3.yandex.net/react/code/meat-01.png',
+            image_mobile:
+              'https://code.s3.yandex.net/react/code/meat-01-mobile.png',
+            image_large:
+              'https://code.s3.yandex.net/react/code/meat-01-large.png',
+            __v: 0
+          }
+        ]
+      }
+    };
+    const orderResult = {
+      success: true,
+      order: {
+        _id: '',
+        status: '',
+        name: '',
+        createdAt: '',
+        updatedAt: '',
+        number: 10,
+        ingredients: []
+      },
+      name: ''
+    }
+
+    const newState = orderReducer(
+      initialState1,
+      fetchOrders.fulfilled(
+        orderResult,
+        '',
+        []
+      )
+    );
+
+    expect(newState).toEqual({
+      ...initialState1,
+      items: initialState.items,
+      orderModalData: orderResult.order
+    });
+  });
+
+  it('проверка rejected', () => {
+    const newState = orderReducer(initialState, fetchOrders.rejected(new Error('Error rejected'), '', []));
+
+    expect(newState).toEqual({
+      ...initialState,
+      error: 'Error rejected'
+    });
   });
 });

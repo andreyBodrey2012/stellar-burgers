@@ -1,13 +1,8 @@
-/**
- * @jest-environment jsdom
- * @jest-environment-options {"url": "https://jestjs.io/"}
- */
 import { expect, describe, it } from '@jest/globals';
 import userOrdersReducer, {
   fetchUserOrders,
   UserOrdersState
 } from './userOrdersSlice';
-import { configureStore } from '@reduxjs/toolkit';
 
 describe('проверка истории заказов пользователя', () => {
   const initialState: UserOrdersState = {
@@ -16,7 +11,19 @@ describe('проверка истории заказов пользовател�
     error: null
   };
 
-  it('проверка на получение истории заказов', async () => {
+  it('проверка pending', () => {
+    const newState = userOrdersReducer(
+      initialState,
+      fetchUserOrders.pending('')
+    );
+
+    expect(newState).toEqual({
+      ...initialState,
+      isLoading: true
+    });
+  });
+
+  it('проверка fulfilled', () => {
     const expectResult = {
       success: true,
       orders: [
@@ -923,32 +930,27 @@ describe('проверка истории заказов пользовател�
       totalToday: 77
     };
 
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          new Promise((resolve) => setTimeout(() => resolve(expectResult), 0))
-      })
-    ) as jest.Mock;
+    const newState = userOrdersReducer(
+      initialState,
+      fetchUserOrders.fulfilled(expectResult.orders, '')
+    );
 
-    Object.defineProperty(document, 'cookie', {
-      get: jest.fn().mockReturnValue({
-        match: jest.fn().mockReturnValue([true, 'accessToken']),
-        toString: () => 'accessToken=accessToken'
-      }),
-      configurable: true
+    expect(newState).toEqual({
+      ...initialState,
+      isLoading: false,
+      items: expectResult.orders
     });
+  });
 
-    const store = configureStore({
-      reducer: { orders: userOrdersReducer }
+  it('проверка rejected', () => {
+    const newState = userOrdersReducer(
+      initialState,
+      fetchUserOrders.rejected(new Error('Error rejected'), '')
+    );
+
+    expect(newState).toEqual({
+      ...initialState,
+      error: 'Error rejected'
     });
-
-    const dispatchPromise = store.dispatch(fetchUserOrders());
-
-    await dispatchPromise;
-
-    const { items, error } = store.getState().orders;
-    expect(error).toBeNull();
-    expect(items).toEqual(expectResult.orders);
   });
 });
